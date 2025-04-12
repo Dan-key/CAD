@@ -93,18 +93,13 @@ public class CadDev : GameWindow
 
         Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(_fov, _aspectRatio, 0.01f, 100f);
 
-        var key0 = GL.GetActiveUniform(shader.GetHandle(), 0, out _, out _);
-        var location0 = GL.GetUniformLocation(shader.GetHandle(), key0);
+        var location0 = GL.GetUniformLocation(shader.GetHandle(), "model");
         GL.UniformMatrix4(location0, true, ref model);
 
-
-        var key1 = GL.GetActiveUniform(shader.GetHandle(), 1, out _, out _);
-        var location1 = GL.GetUniformLocation(shader.GetHandle(), key1);
+        var location1 = GL.GetUniformLocation(shader.GetHandle(), "view");
         GL.UniformMatrix4(location1, true, ref view);
 
-
-        var key2 = GL.GetActiveUniform(shader.GetHandle(), 2, out _, out _);
-        var location2 = GL.GetUniformLocation(shader.GetHandle(), key2);
+        var location2 = GL.GetUniformLocation(shader.GetHandle(), "projection");
         GL.UniformMatrix4(location2, true, ref projection);
 
         GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
