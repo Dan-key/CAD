@@ -84,16 +84,23 @@ public class CadDev : GameWindow
 
     private Vector3 _lastPositionCamera = new Vector3(0f, 0f, 1.5f);
     private Vector3 _lastPositionModel = new Vector3(0f, 0f, 0f);
+
+    private float _scrollPositionCameraZ = 1.5f;
+    private float _scrollPositionModelZ = 0f;
     protected override void OnRenderFrame(FrameEventArgs e)
     {
         base.OnRenderFrame(e);
+        if (MouseState.ScrollDelta.Y != 0)
+        {
+            _scrollPositionCameraZ -= MouseState.ScrollDelta.Y * 0.04f;
+            _scrollPositionModelZ -= MouseState.ScrollDelta.Y * 0.04f;
+        }
         if (MouseState.IsButtonPressed(MouseButton.Left))
         {
             mouseX = MouseState.Position.X;
             mouseY = MouseState.Position.Y;
             _yaw = _lastYaw;
             _pitch = _lastPitch;
-
         } else if (MouseState.IsButtonDown(MouseButton.Left))
         {
             var mousePosition = MouseState.Position;
@@ -101,8 +108,8 @@ public class CadDev : GameWindow
             float moveY = mousePosition.Y - mouseY;
             if (KeyboardState.IsKeyDown(Keys.LeftShift))
             {
-                _positionCamera = new Vector3(-moveX * 0.0005f, moveY * 0.0005f, 0) + _lastPositionCamera;
-                _positionModel = new Vector3(-moveX * 0.0005f, moveY * 0.0005f, 0) + _lastPositionModel;
+                _positionCamera = new Vector3(-moveX * 0.0008f, moveY * 0.0008f, 0) + _lastPositionCamera;
+                _positionModel = new Vector3(-moveX * 0.0008f, moveY * 0.0008f, 0) + _lastPositionModel;
             }
             else
             {
@@ -123,6 +130,10 @@ public class CadDev : GameWindow
             _lastPositionCamera = _positionCamera;
             _lastPositionModel = _positionModel;
         }
+
+        _positionCamera.Z = _scrollPositionCameraZ;
+        _positionModel.Z = _scrollPositionModelZ;
+
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
         Matrix4 model  = Matrix4.Identity * 
