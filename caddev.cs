@@ -76,13 +76,53 @@ public class CadDev : GameWindow
 
     private float _fov = MathHelper.PiOver2;
     private float _aspectRatio = 1.0f;
+    
+    private float mouseX = 0;
+    private float mouseY = 0;
+    private float _lastYaw = 0;
+    private float _lastPitch = 0;
 
+    private Vector3 _lastPositionCamera = new Vector3(0f, 0f, 1.5f);
+    private Vector3 _lastPositionModel = new Vector3(0f, 0f, 0f);
     protected override void OnRenderFrame(FrameEventArgs e)
     {
         base.OnRenderFrame(e);
+        if (MouseState.IsButtonPressed(MouseButton.Left))
+        {
+            mouseX = MouseState.Position.X;
+            mouseY = MouseState.Position.Y;
+            _yaw = _lastYaw;
+            _pitch = _lastPitch;
 
-        _yaw += 128.0f * (float)e.Time;
+        } else if (MouseState.IsButtonDown(MouseButton.Left))
+        {
+            var mousePosition = MouseState.Position;
+            float moveX = mousePosition.X - mouseX;
+            float moveY = mousePosition.Y - mouseY;
+            if (KeyboardState.IsKeyDown(Keys.LeftShift))
+            {
+                _positionCamera = new Vector3(-moveX * 0.0005f, moveY * 0.0005f, 0) + _lastPositionCamera;
+                _positionModel = new Vector3(-moveX * 0.0005f, moveY * 0.0005f, 0) + _lastPositionModel;
+            }
+            else
+            {
+                if (!KeyboardState.IsKeyDown(Keys.X))
+                {
+                    _pitch = 0.2f * moveY + _lastPitch;
+                }
+                if (!KeyboardState.IsKeyDown(Keys.Y))
+                {
+                    _yaw = 0.2f * moveX + _lastYaw;
+                }
+            }
 
+        } else if (MouseState.IsButtonReleased(MouseButton.Left))
+        {
+            _lastYaw = _yaw;
+            _lastPitch = _pitch;
+            _lastPositionCamera = _positionCamera;
+            _lastPositionModel = _positionModel;
+        }
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
         Matrix4 model  = Matrix4.Identity * 
@@ -101,7 +141,6 @@ public class CadDev : GameWindow
 
         var location2 = GL.GetUniformLocation(shader.GetHandle(), "projection");
         GL.UniformMatrix4(location2, true, ref projection);
-
         GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
         //Code goes here.
         SwapBuffers();
