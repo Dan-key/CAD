@@ -108,8 +108,16 @@ public class CadDev : GameWindow
             float moveY = mousePosition.Y - mouseY;
             if (KeyboardState.IsKeyDown(Keys.LeftShift))
             {
-                _positionCamera = new Vector3(-moveX*2/this.ClientSize.X, moveY*2/this.ClientSize.Y, 0) + _lastPositionCamera;
-                _positionModel = new Vector3(-moveX*2/this.ClientSize.X, moveY*2/this.ClientSize.Y, 0) + _lastPositionModel;
+                 if (KeyboardState.IsKeyDown(Keys.X)) {
+                    _positionCamera = new Vector3(-moveX*2/this.ClientSize.X, 0, 0) + _lastPositionCamera;
+                    _positionModel = new Vector3(-moveX*2/this.ClientSize.X, 0, 0) + _lastPositionModel;
+                 } else if (KeyboardState.IsKeyDown(Keys.Y)) {
+                    _positionCamera = new Vector3(0, moveY*2/this.ClientSize.Y, 0) + _lastPositionCamera;
+                    _positionModel = new Vector3(0, moveY*2/this.ClientSize.Y, 0) + _lastPositionModel;
+                 } else {
+                    _positionCamera = new Vector3(-moveX*2/this.ClientSize.X, moveY*2/this.ClientSize.Y, 0) + _lastPositionCamera;
+                    _positionModel = new Vector3(-moveX*2/this.ClientSize.X, moveY*2/this.ClientSize.Y, 0) + _lastPositionModel;
+                 }
             }
             else
             {
