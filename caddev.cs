@@ -121,13 +121,17 @@ public class CadDev : GameWindow
             }
             else
             {
-                if (!KeyboardState.IsKeyDown(Keys.X))
-                {
-                    _pitch = 0.2f * moveY + _lastPitch;
-                }
-                if (!KeyboardState.IsKeyDown(Keys.Y))
+                if (KeyboardState.IsKeyDown(Keys.X))
                 {
                     _yaw = 0.2f * moveX + _lastYaw;
+                    _pitch = _lastPitch;
+                } else if (KeyboardState.IsKeyDown(Keys.Y))
+                {
+                    _yaw = _lastYaw;
+                    _pitch = 0.2f * moveY + _lastPitch;
+                } else {
+                    _yaw = 0.2f * moveX + _lastYaw;
+                    _pitch = 0.2f * moveY + _lastPitch;
                 }
             }
 
