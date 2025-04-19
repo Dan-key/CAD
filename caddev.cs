@@ -138,6 +138,8 @@ public class CadDev : GameWindow
             _lastPitch = 0;
             _lastPositionCamera = new Vector3(0f, 0f, 1.5f);
             _lastPositionModel = new Vector3(0f, 0f, 0f);
+            _scrollPositionCameraZ = 1.5f;
+            _scrollPositionModelZ = 0f;
         } 
 
         _positionCamera.Z = _scrollPositionCameraZ;
