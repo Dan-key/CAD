@@ -24,14 +24,15 @@ public class CadDev : GameWindow
     }
 
     float[] vertices = {
-        -0.5f, -0.5f, 0.0f, //Bottom-left vertex
-        0.5f, -0.5f, 0.0f, //Bottom-right vertex
-        0.0f,  0.5f, 0.0f  //Top vertex
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, //Bottom-left vertex
+        0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f, //Bottom-right vertex
+        0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f //Top vertex
     };
     int VertexBufferObject;
-    int VertexArrayObject;
+    int _vaoModel;
+    int _vaoLamp;
     Shader shader;
-
+    Shader shaderLighting;
 
     protected override void OnUpdateFrame(FrameEventArgs e)
     {
@@ -58,13 +59,25 @@ public class CadDev : GameWindow
         GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
 
         shader = new Shader("shader.vert", "shader.frag");
+        shaderLighting = new Shader("shader.vert", "lighting.frag");
 
-        VertexArrayObject = GL.GenVertexArray();
-        GL.BindVertexArray(VertexArrayObject);
+        _vaoModel = GL.GenVertexArray();
+        GL.BindVertexArray(_vaoModel);
 
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-        GL.EnableVertexAttribArray(0);
-        shader.Use();
+        var positionLocation = GL.GetAttribLocation(shaderLighting.GetHandle(), "aPosition");
+        GL.EnableVertexAttribArray(positionLocation);
+        GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+        
+        var normalLocation = GL.GetAttribLocation(shaderLighting.GetHandle(), "aNormal");
+        GL.EnableVertexAttribArray(normalLocation);
+        GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3*sizeof(float));
+
+        _vaoLamp = GL.GenVertexArray();
+        GL.BindVertexArray(_vaoLamp);
+
+        var posLocation = GL.GetAttribLocation(shader.GetHandle(), "aPosition");
+        GL.EnableVertexAttribArray(posLocation);
+        GL.VertexAttribPointer(posLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
     }
 
     private float _pitch = 0f;
@@ -167,15 +180,45 @@ public class CadDev : GameWindow
 
         Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(_fov, _aspectRatio, 0.01f, 100f);
 
+
+        GL.BindVertexArray(_vaoModel);
+
+
+        GL.UseProgram(shaderLighting.GetHandle());
+        
+        var locationLighting0 = GL.GetUniformLocation(shaderLighting.GetHandle(), "model");
+        GL.UniformMatrix4(locationLighting0, true, ref model);
+
+        var locationLighting1 = GL.GetUniformLocation(shaderLighting.GetHandle(), "view");
+        GL.UniformMatrix4(locationLighting1, true, ref view);
+
+        var locationLighting2 = GL.GetUniformLocation(shaderLighting.GetHandle(), "projection");
+        GL.UniformMatrix4(locationLighting2, true, ref projection);
+
+        var locationObjectColor_light = GL.GetUniformLocation(shaderLighting.GetHandle(), "objectColor");
+        var locationLightColor_light = GL.GetUniformLocation(shaderLighting.GetHandle(), "lightColor");
+        var locationLightPos_light = GL.GetUniformLocation(shaderLighting.GetHandle(), "lightPos");
+        var locationViewPos_light = GL.GetUniformLocation(shaderLighting.GetHandle(), "viewPos");
+
+        GL.Uniform3(locationObjectColor_light, 1.0f, 0.5f, 0.31f);
+        GL.Uniform3(locationLightColor_light, 1.0f, 1.0f, 1.0f);
+        GL.Uniform3(locationLightPos_light, 1.2f, 1.0f, 2.0f);
+        GL.Uniform3(locationViewPos_light, _positionCamera);
+
+        GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+        GL.BindVertexArray(_vaoLamp);
+        GL.UseProgram(shader.GetHandle());
+
+        Matrix4 lampMatrix = Matrix4.CreateScale(0.2f) * Matrix4.CreateTranslation(1.2f, 1.0f, -2.0f);
+
         var location0 = GL.GetUniformLocation(shader.GetHandle(), "model");
-        GL.UniformMatrix4(location0, true, ref model);
+        GL.UniformMatrix4(location0, true, ref lampMatrix);
 
         var location1 = GL.GetUniformLocation(shader.GetHandle(), "view");
         GL.UniformMatrix4(location1, true, ref view);
 
         var location2 = GL.GetUniformLocation(shader.GetHandle(), "projection");
         GL.UniformMatrix4(location2, true, ref projection);
-        GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
         //Code goes here.
         SwapBuffers();
     }
